@@ -1,0 +1,56 @@
+def random_distance(lower_bound, upper_bound):
+    return lower_bound + (upper_bound - lower_bound)*random()
+end
+
+# Get the initial pose
+movej([0, -1.57, 0, -1.57, 0, 0], a=1.0, v=0.1)
+movej([-1.57, -1.57, 1.57, -1.57, -1.57, 0], a=0.1, v=0.01)
+initial_pose = get_actual_tcp_pose()
+
+def random_movement(x_bounds=[], y_bounds=[], z_bounds=[], rx_bounds=[], ry_bounds=[], rz_bounds=[]):
+    # Initialize the pose offset as zero
+    pose_offset = p[0, 0, 0, 0, 0, 0]
+
+    # If bounds are given, generate a random distance within the bounds for the corresponding axis
+    if (x_bounds != []):
+        pose_offset[0] = random_distance(x_bounds[0], x_bounds[1])
+    end
+
+    if (y_bounds != []):
+        pose_offset[1] = random_distance(y_bounds[0], y_bounds[1])
+    end
+
+    if (z_bounds != []):
+        pose_offset[2] = random_distance(z_bounds[0], z_bounds[1])
+    end
+
+    if (rx_bounds != []):
+        # Convert the bounds from degrees to radians
+        rx_bounds_rad = [rx_bounds[0]*3.14159/180, rx_bounds[1]*3.14159/180]
+        pose_offset[3] = random_distance(rx_bounds_rad[0], rx_bounds_rad[1])
+    end
+
+    if (ry_bounds != []):
+        # Convert the bounds from degrees to radians
+        ry_bounds_rad = [ry_bounds[0]*3.14159/180, ry_bounds[1]*3.14159/180]
+        pose_offset[4] = random_distance(ry_bounds_rad[0], ry_bounds_rad[1])
+    end
+
+    if (rz_bounds != []):
+        # Convert the bounds from degrees to radians
+        rz_bounds_rad = [rz_bounds[0]*3.14159/180, rz_bounds[1]*3.14159/180]
+        pose_offset[5] = random_distance(rz_bounds_rad[0], rz_bounds_rad[1])
+    end
+
+    # Calculate the target pose based on the initial pose
+    target_pose = pose_add(initial_pose, pose_offset)
+
+    # Check if the target_pose has a solution and is within safety limits
+
+    # Perform the movement with a blend radius
+    movel(target_pose, a=1.0, v=0.1)
+end
+while (True):
+    # Call the random_movement function with the desired bounds
+    random_movement(x_bounds=[-0.05,0.05], y_bounds=[-0.05,0.05], z_bounds=[-0.05,0.05], rx_bounds=[-10,10], ry_bounds=[-10,10], rz_bounds=[-10,10])
+end

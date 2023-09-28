@@ -1,0 +1,3 @@
+include openur/*.xml
+include openur/rtde/*.xml
+include *.xml
