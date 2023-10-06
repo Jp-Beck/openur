@@ -11,6 +11,7 @@ __status__ = "Development"
 ```
 
 For full documentation visit [jp-beck.github.io](https://jp-beck.github.io/learnur/OpenUr/)
+Download from the [PyPi.org](https://pypi.org/project/OpenUr/)
 
 
 # Documentation Guide
