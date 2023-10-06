@@ -48,11 +48,11 @@ This is the all in one package to control or get data from the Universal robots.
 - Refer to the [Examples/Tutorials](./docs/examples.md)
 
 ## [API Reference](./docs/APIReference.md#API)
-- This section will be update in the future.
+- This section will be updated in the future.
 
 ## [Examples/Tutorials](./docs/examples.md)
 - Step-by-step guides or use-case driven tutorials.
-- Helps users understand real-world applications of your package.
+- Helps users understand real-world applications of package.
 
 ## [FAQs](./docs/FAQs.md)
 -  Common questions or issues that users might encounter.
@@ -69,10 +69,10 @@ This is the all in one package to control or get data from the Universal robots.
 - Document the changes made in each release.
 
 ## [License](./LICENSE)
-- Clearly state the license under which your software is released.
+- The license under which your software is released.
 
 ## [Contact/Support](./docs/support.md)
-- Provide information on how users can get support.
+- Information on how users can get support.
 
 ## [Glossary](./docs/glossary.md)
 - Technical terms or jargon used.
