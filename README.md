@@ -10,7 +10,7 @@ __email__ = "jp-beck@outlook.com"
 __status__ = "Development"
 ```
 
-For full documentation visit [jp-beck.github.io](https://jp-beck.github.io/learnur/OpenUr/)
+For full documentation visit [jp-beck.github.io](https://jp-beck.github.io/learnur/OpenUr/) <br>
 Download from the [PyPi.org](https://pypi.org/project/OpenUr/)
 
 
