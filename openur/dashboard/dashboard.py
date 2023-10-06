@@ -37,7 +37,7 @@ class DashboardClient:
                         self.conn.close()
                     self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                     self.conn.connect((self.host, self.port))
-                    data = self.conn.recv(1024).decode('utf8')
+                    data = self.conn.recv(1024).decode('utf8') # Do not delete this as it is needed to discard the greeting message from robot.
                 logging.info('Dashboard Connection Established with {}:{}'.format(self.host, self.port))
                 break 
             except (socket.error, Exception) as e:
@@ -51,7 +51,7 @@ class DashboardClient:
                 self.conn.close()
                 logging.info('Dashboard Connection Closed with {}:{}'.format(self.host, self.port))
         except (socket.error, Exception) as e:
-            logging.error(f"Error closing connection to {self.host}:{self.port}: {e}")
+            logging.error(f"Error closing Dashboard connection to {self.host}:{self.port}: {e}")
 
     def stop_dashboard_connection(self):
         """Stop any ongoing connection attempts or operations."""

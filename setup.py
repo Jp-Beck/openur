@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='OpenUr',
-    version='0.2.3',
+    version='0.2.4',
     packages=find_packages(),
     entry_points={
         'console_scripts': [
@@ -12,7 +12,8 @@ setup(
     py_modules=['openur'],
     install_requires=[
         'numpy',
-        'math3d'  
+        'math3d',
+        'ikpy'  
     ],
     author='Beck Isakov',
     author_email='jp-beck@outlook.com',

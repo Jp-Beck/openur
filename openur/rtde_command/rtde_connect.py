@@ -97,7 +97,7 @@ class URConnect:
         try:
             if self.con:
                 self.con.disconnect()
-                logging.info('Connection closed...')
+                logging.info(f"RTDE disconnected from robot: {self.ROBOT_HOST}:{self.ROBOT_PORT}")
         except (Exception) as e:
             logging.error(f"Error closing connection to {self.ROBOT_HOST}:{self.ROBOT_PORT}: {e}")
 
@@ -107,8 +107,7 @@ class URConnect:
         self.close()
         
     def __del__(self): 
-        if self.con is not None:
-            self.con.disconnect()
+        self.stop_rtde_connection()
 
     def receive_buffered(self,data_type):
         self.con.receive_buffered(data_type)

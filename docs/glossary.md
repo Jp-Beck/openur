@@ -1,0 +1,1 @@
+## All the script naming conventions are based on the URScript manual

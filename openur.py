@@ -3,7 +3,7 @@ __copyright__ = "Beck isakov"
 __credits__ = "Martin Huus Bjerge"
 __contact__ = "https://github.com/Jp-Beck"
 __license__ = "GPL v3"
-__version__ = "0.2.0"
+__version__ = "0.2.4"
 __maintainer__ = "Beck Isakov"
 __email__ = "jp-beck@outlook.com"
 __status__ = "Development"
@@ -17,10 +17,27 @@ from openur.dashboard import Dashboard
 from openur.rtde_command import RTDECommands
 from openur.urscript import URClient
 
+import threading
+import sys
+import csv
+import inspect
+
+if sys.version_info[0] == 2:
+    import xmlrpclib
+    from SimpleXMLRPCServer import SimpleXMLRPCServer
+else:
+    import xmlrpc.client as xmlrpclib
+    from xmlrpc.server import SimpleXMLRPCServer
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Decorator to register a function as an XML-RPC function.
+def rpc(func):
+    """Decorator to register a function as an XML-RPC function."""
+    func.is_rpc_function = True
+    return func
 
 # Main class
 class OpenUR:
@@ -35,7 +52,7 @@ class OpenUR:
         self.dashboard = Dashboard(ip_address)
         self.dashboard.connect()
         self.ur_client = URClient(ip_address)
-        self.ur_client.connect()
+
     
     def close(self):
         self.rtde_cmd.close()
@@ -535,6 +552,10 @@ class OpenUR:
         return self.rtde_cmd.set_standard_digital_output(number, value)
 
     ## URClient Methods
+
+    def desired_function(self, command, pc_ip, pc_port):
+        return self.ur_client.desired_function(command, pc_ip, pc_port)
+
     def stop_command(self):
         return self.ur_client.stop_command()
     
@@ -550,12 +571,124 @@ class OpenUR:
     def movej(self, joints, a=1.2, v=0.25):
         return self.ur_client.movej(joints, a, v)
     
-    def get_actual_joint_positions(self):
-        return self.ur_client.get_actual_joint_positions()
-
     def set_tcp(self, pose):
         return self.ur_client.set_tcp(pose)
     
     def force_mode(self, task_frame, selection_vector, wrench, f_type, limits):
         return self.ur_client.force_mode(task_frame, selection_vector, wrench, f_type, limits)
+    
+    def freedrive_mode(self, freeAxes, feature):
+        return self.ur_client.freedrive_mode(freeAxes, feature)
+    
+    
+    class XMLRPC:
+        def __init__(self, LOG_FILENAME = 'openur_data.log',  port=33000):
+            self.server = SimpleXMLRPCServer(("", port), allow_none=True)
+            self.server.RequestHandlerClass.protocol_version = "HTTP/1.1"
+
+            # Register RPC functions
+            '''self.server.register_function(self.negBool, 'negBool')
+            self.server.register_function(self.openur_log, 'openur_log')
+            self.server.register_function(self.openur_csv_log, 'openur_csv_log')
+            self.server.register_function(self.openur_simple_log, 'openur_simple_log')'''
+            # Automatically register RPC functions
+            for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
+                if getattr(method, 'is_rpc_function', False):
+                    self.server.register_function(method, name)
+
+
+
+            # Setup logger
+            self.logger = logging.getLogger('myLogger')
+            self.logger.setLevel(logging.INFO)
+
+            fh = logging.FileHandler(LOG_FILENAME)
+            fh.setLevel(logging.INFO)
+            formatter = logging.Formatter('%(asctime)s - %(message)s')
+            fh.setFormatter(formatter)
+            self.logger.addHandler(fh)
+
+            self.counter = 1
+        
+        # RPC functions:
+        def negBool(self, boo):
+            self.logger.info("Received the boolean: %s", boo) 
+            return not boo
+        
+        @rpc
+        def openur_log(self, value, info="INFO"):
+            try:
+                if isinstance(value, dict) and all(key in value for key in ("rx", "ry", "rz", "x", "y", "z")):
+                    formatted_value = [str(value[key]) for key in ("x", "y", "z", "rx", "ry", "rz")]
+                    log_message = ", ".join(formatted_value)
+                elif isinstance(value, (str, int, float)):
+                    log_message = str(value)
+                else:
+                    log_message = 'Unsupported type: ' + str(type(value))
+                log_line = "{0}| {1}".format(info, log_message)
+                self.logger.info(log_line)
+            except Exception as e:
+                self.logger.error("Could not log the value: %s", e)
+        @rpc
+        def openur_csv_log(self, value, info="INFO"):
+            try:
+                if isinstance(value, dict) and all(key in value for key in ("rx", "ry", "rz", "x", "y", "z")):
+                    formatted_value = [str(value[key]) for key in ("x", "y", "z", "rx", "ry", "rz")]
+                elif isinstance(value, (str, int, float)):
+                    formatted_value = [str(value)]
+                else:
+                    formatted_value = ['Unsupported type: ' + str(type(value))]
+                log_line = [str(self.counter)] + formatted_value
+                with open('openur_data.csv', 'a', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(log_line)
+                self.counter += 1
+            except Exception as e:
+                self.logger.error("Could not log the value to CSV: %s", e)
+        @rpc
+        def openur_simple_log(self, value, info="INFO"):
+            try:
+                if isinstance(value, dict) and all(key in value for key in ("rx", "ry", "rz", "x", "y", "z")):
+                    formatted_value = [str(value[key]) for key in ("x", "y", "z", "rx", "ry", "rz")]
+                elif isinstance(value, (str, int, float)):
+                    formatted_value = [str(value)]
+                else:
+                    formatted_value = ['Unsupported type: ' + str(type(value))]
+                log_line = formatted_value
+                with open('openur_simple_log.csv', 'a', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(log_line)
+            except Exception as e:
+                self.logger.error("Could not log the value to CSV: %s", e)
+        
+        def register_my_function(self, func, name=None):
+            """Registers a custom function to the XML-RPC server.
+
+            Args:
+            - func: The function to be registered.
+            - name (optional): The name under which the function is registered. 
+                               Defaults to func.__name__.
+            """
+            self.server.register_function(func, name or func.__name__)
+
+        def shutdown(self):
+            self.server.shutdown()
+            self.server.server_close()
+            self.logger.info("XML-RPC Server closed")
+
+        def start(self):
+            try:
+                sys.stdout.write(f"Listening on port {self.server.server_address[1]}...\n")
+                server_thread = threading.Thread(target=self.server.serve_forever)
+                server_thread.start()
+                server_thread.join()  # This will make the main thread wait until server_thread is done
+            except KeyboardInterrupt:
+                self.shutdown()
+                # Assuming you've captured the IP in self.client_ip during the request handling:
+                sys.stdout.write(f" XML-RPC Server stopped listening on port: {self.server.server_address[1]}\n")
+
+        def stop(self):
+            self.shutdown()
+            sys.stdout.write("Server stopped\n")
+
 
