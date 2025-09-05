@@ -1,0 +1,13 @@
+<rtde_config>
+	<recipe key="rco">
+		<field name="actual_q" type="VECTOR6D"/>
+		<field name="actual_digital_input_bits" type="UINT64"/>
+		<field name="actual_digital_output_bits" type="UINT64"/>
+	</recipe>
+	<recipe key="rci">
+		<field name="configurable_digital_output_mask" type="UINT8"/>
+		<field name="configurable_digital_output" type="UINT8"/>
+		<field name="standard_digital_output_mask" type="UINT8"/>
+		<field name="standard_digital_output" type="UINT8"/>
+	</recipe>
+</rtde_config>

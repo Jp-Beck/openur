@@ -1,0 +1,35 @@
+# changes made to the Dashboard class:
+
+	explicit connec() and close() functions are added for the user to be able to start/stop connections manually.
+	Such freedom may lead for the user to forget to close the connection and reconnect only to find connection error. However, if 
+	Dashboard methods are called via OpenUR class, it makes sure to aytomatically close and clean up resources.
+
+## reason to change:
+	
+	The context manager approach in the Dashboard class is meant to ensure that resources (in this case, socket connections) 
+	are managed correctly — opened when needed and closed when done. If you use the context manager frequently within a tight 
+	loop or across numerous methods, there are some potential challenges to be aware of:
+
+	Connection Overhead: If every method in the OpenUR class that interacts with the robot is repeatedly opening and closing 
+	the connection using the context manager, you will introduce a significant connection overhead. Establishing a socket connection 
+	isn't free in terms of time, and repeatedly doing so can slow down your application.
+
+	Connection Limitations: Depending on the server side (the UR dashboard server), there might be limitations on how frequently you 
+	can establish connections, or there might be a maximum number of simultaneous connections allowed. If you're continuously connecting 
+	and disconnecting, you might hit those limits.
+
+	Connection Errors: The more frequently you connect and disconnect, the higher the likelihood of occasionally encountering connection 
+	errors due to various transient network issues.
+
+	Code Clarity: Frequently using the context manager across many methods for short operations can make the code less readable, 
+	as the context of the with block will primarily be about managing the connection and not about the operation's main logic.
+
+	Resource Management: Although the context manager ensures that the resource is cleaned up correctly, frequent connections 
+	and disconnections might lead to occasional resource contention or leaks, especially if there's multithreading or multiprocessing involved.
+	
+# To use the transfer_files() from the dashboard, first do ssh root@ip_address_robot and accept the fingerprints.
+
+# You can now use all, URScript, Dashboard and RTDE methods by just importing openur. 2023-09-28
+
+
+
