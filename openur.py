@@ -7,7 +7,7 @@ TCP/IP interfaces. Provides unified access to Dashboard Server, RTDE, and URScri
 __credits__ = "Beck Isakov"
 __copyright__ = "Beck Isakov"
 __license__ = "GPL v3"
-__version__ = "0.2.3"
+__version__ = "0.3.0"
 __maintainer__ = "Beck Isakov"
 __email__ = "jp-beck@outlook.com"
 __status__ = "Development"
